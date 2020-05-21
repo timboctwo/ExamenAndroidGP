@@ -1,0 +1,2 @@
+rootProject.name='ExamenAndroidGP'
+include ':app'
