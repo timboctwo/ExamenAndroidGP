@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:layout_marginTop="8dp"
+    android:weightSum="2"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/textViewDatosPersonales"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_weight="1"/>
+    <TextView
+        android:id="@+id/textViewPuesto"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:textSize="12sp"
+        android:layout_weight="1"/>
+</LinearLayout>
