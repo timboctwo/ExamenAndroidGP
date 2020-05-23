@@ -1,8 +1,10 @@
 package com.example.examenandroidgp.Activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
@@ -27,12 +29,17 @@ public class FirstActivity extends AppCompatActivity implements OnMapReadyCallba
     EditText editTextNumberOfMarkers;
 
     private GoogleMap gMap;
+    private Random r;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
         ButterKnife.bind(this);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        r = new Random();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
@@ -73,11 +80,19 @@ public class FirstActivity extends AppCompatActivity implements OnMapReadyCallba
     private LatLng generateRandomLatLng(){
         float lat = 0;
         float lng = 0;
-
-        Random r = new Random();
         lat = -90 + r.nextFloat() * (90 - (-90));
         lng = -180 + r.nextFloat() * (180 - (-180));
 
         return new LatLng(lat, lng);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -1,9 +1,11 @@
 package com.example.examenandroidgp.Activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -39,6 +41,9 @@ public class FourthActivity extends AppCompatActivity {
         setContentView(R.layout.activity_fourth);
         ButterKnife.bind(this);
         context = this;
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         db = new EmpleadosSQLiteHelper(context);
         if (db.getEmpleadosCount() > 0){
             setListViewEmpleados();
@@ -79,6 +84,16 @@ public class FourthActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
         btnCreateEmpleados.setVisibility(View.GONE);
         btnDeleteEmpleados.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }
