@@ -13,16 +13,20 @@ import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -94,7 +98,6 @@ public class SecondActivity extends AppCompatActivity implements OnMapReadyCallb
     private long enqueue;
     private DownloadManager dm;
 
-    private static final String AUTHORITY= BuildConfig.APPLICATION_ID+".provider";
     private static final int REQUEST_STORAGE_PERMISSIONS = 1;
     private static final int BUFFER_SIZE = 4096;
     private static final String DIR_UPX = "upx";
@@ -121,28 +124,33 @@ public class SecondActivity extends AppCompatActivity implements OnMapReadyCallb
     private void initProgressDialog(){
         progressDialog = new ProgressDialog(this);
         progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Downloading ZIP");
-    }
-
-    @OnClick({R.id.fabDownloadFromCustomServer, R.id.fabDownloadFromUPXServer})
-    public void toggleZipRequest(View view){
-        switch (view.getId()){
-            case R.id.fabDownloadFromCustomServer:
-                downloadZIPRoute = "http://beta.timbocktu.com/upx.zip";
-                downloadZip(downloadZIPRoute);
-                break;
-            case R.id.fabDownloadFromUPXServer:
-                makeVolleyRequest();
-                break;
-            default:
-                break;
-        }
+        progressDialog.setMessage("Realizando peticion y descarga de ZIP");
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
-        Snackbar.make(findViewById(android.R.id.content), "Amarillo -> Peticion al servidor UPX\nAzul -> ZIP desde servidor personal", 5000).show();
+        if (isNetworkAvailable()){
+            makeVolleyRequest();
+        }else{
+            AlertDialog dialog = new AlertDialog.Builder(context)
+                    .setCancelable(false)
+                    .setMessage("Debes estar conectado a internet para realizar la peticion REST")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                        }
+                    })
+                    .create();
+            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface args) {
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorPrimaryDark));
+                }
+            });
+            dialog.show();
+        }
     }
 
     private void initBroadcastReceiver(){
@@ -194,7 +202,7 @@ public class SecondActivity extends AppCompatActivity implements OnMapReadyCallb
             File txtFile = new File(upxDirPath+"/" +zipEntryName);
 
             if (txtFile.exists()) {
-                txtFile = new File(upxDirPath+"/"+zipEntryName+formatter.format(new Date()));
+                txtFile = new File(upxDirPath+"/"+formatter.format(new Date())+zipEntryName);
             }
             if(zipEntry.isDirectory()){
                 txtFile.mkdirs();
@@ -257,6 +265,13 @@ public class SecondActivity extends AppCompatActivity implements OnMapReadyCallb
 
     }
 
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     private void makeVolleyRequest(){
         progressDialog.show();
         Map<String, Object> mapParams = new HashMap<>();
@@ -271,7 +286,9 @@ public class SecondActivity extends AppCompatActivity implements OnMapReadyCallb
                     try {
                         if (response.getBoolean("success")){
                             downloadZIPRoute = response.getString("message");
-                            Log.i("downloadZIPRoute", downloadZIPRoute);
+                            Snackbar.make(findViewById(android.R.id.content),
+                                    "Success: "+response.getBoolean("success")+"\n"
+                                        +"Code: "+response.getString("code"), 3000).show();
                             downloadZip(downloadZIPRoute);
                         }else{
                             Snackbar.make(findViewById(android.R.id.content), "El codigo de respuesta no es correcto", 3000).show();
@@ -343,9 +360,29 @@ public class SecondActivity extends AppCompatActivity implements OnMapReadyCallb
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     downloadZip(downloadZIPRoute);
                 } else {
-                    ActivityCompat.requestPermissions(SecondActivity.this,
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                            REQUEST_STORAGE_PERMISSIONS);
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                        AlertDialog dialog = new AlertDialog.Builder(context)
+                                .setCancelable(false)
+                                .setMessage("Debes otorgar los permisos de almacenamiento para hacer uso de esta funcion")
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        ActivityCompat.requestPermissions(SecondActivity.this,
+                                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                                REQUEST_STORAGE_PERMISSIONS);
+                                    }
+                                })
+                                .create();
+                        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                            @Override
+                            public void onShow(DialogInterface args) {
+                                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorPrimaryDark));
+                            }
+                        });
+                        dialog.show();
+                    }else{
+                        Snackbar.make(findViewById(android.R.id.content), "Por favor, activa los permisos de almacenamiento desde Configuraciones", 3000).show();
+                    }
                 }
                 return;
             }
