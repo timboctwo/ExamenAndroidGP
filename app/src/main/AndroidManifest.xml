@@ -14,11 +14,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.FourthActivity"></activity>
-        <activity android:name=".Activities.ThirdActivity" />
-        <activity android:name=".Activities.SecondActivity" />
+        <activity android:name=".Activities.FourthActivity.FourthActivity"></activity>
+        <activity android:name=".Activities.ThirdActivity.ThirdActivity" />
+        <activity android:name=".Activities.SecondActivity.SecondActivity" />
         <activity
-            android:name=".Activities.FirstActivity"
+            android:name=".Activities.FirstActivity.FirstActivity"
             android:screenOrientation="portrait" />
 
         <meta-data

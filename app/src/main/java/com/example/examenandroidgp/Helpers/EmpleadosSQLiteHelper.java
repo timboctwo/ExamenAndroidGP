@@ -29,6 +29,7 @@ public class EmpleadosSQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
         String CREATE_EMPLEADOS_TABLE = "CREATE TABLE "+TABLE_EMPLEADOS+"("
                 +KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
                 +KEY_NOMBRE+" TEXT,"

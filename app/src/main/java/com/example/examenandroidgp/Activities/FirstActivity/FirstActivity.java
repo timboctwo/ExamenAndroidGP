@@ -1,7 +1,9 @@
-package com.example.examenandroidgp.Activities;
+package com.example.examenandroidgp.Activities.FirstActivity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -9,15 +11,13 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.example.examenandroidgp.R;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.util.Random;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,17 +29,24 @@ public class FirstActivity extends AppCompatActivity implements OnMapReadyCallba
     EditText editTextNumberOfMarkers;
 
     private GoogleMap gMap;
-    private Random r;
+    private FirstActivityViewModel firstActivityViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
         ButterKnife.bind(this);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        firstActivityViewModel = new ViewModelProvider(this).get(FirstActivityViewModel.class);
+        final Observer<String> observer = new Observer<String>() {
+            @Override
+            public void onChanged(String quantity) {
+                ArrayList<MarkerOptions> randomMarkers = firstActivityViewModel.getRandomMarkers(quantity);
+                setRandomMarkers(randomMarkers);
+            }
+        };
 
-        r = new Random();
+        firstActivityViewModel.getMarkersQuantity().observe(this, observer);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
@@ -47,9 +54,13 @@ public class FirstActivity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
-        LatLng latLng = new LatLng(-34f, 151f);
-        gMap.addMarker(new MarkerOptions().position(latLng).title("Marker inSyfney"));
-        gMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+    }
+
+    private void setRandomMarkers(ArrayList<MarkerOptions> randomMarkers){
+        gMap.clear();
+        for (MarkerOptions marker: randomMarkers) {
+            gMap.addMarker(marker);
+        }
     }
 
     @OnClick(R.id.btnCreateMarkers)
@@ -57,33 +68,12 @@ public class FirstActivity extends AppCompatActivity implements OnMapReadyCallba
         if (checkEmptyField()){
             Snackbar.make(findViewById(android.R.id.content),"Debes ingresar un numero", 3000).show();
         }else{
-            displayRandomMarkers(editTextNumberOfMarkers.getText().toString().trim());
+            firstActivityViewModel.setMarkersQuantity(editTextNumberOfMarkers.getText().toString().trim());
         }
     }
 
     private boolean checkEmptyField(){
         return (editTextNumberOfMarkers.getText().toString().trim().isEmpty());
-    }
-
-    private void displayRandomMarkers(String numberOfMarkers){
-        /** Cleans the map and deletes previous markers **/
-        gMap.clear();
-
-        int iterations = Integer.parseInt(numberOfMarkers);
-        for (int i = 0; i < iterations; i++){
-            LatLng randomLatLng = generateRandomLatLng();
-            gMap.addMarker(new MarkerOptions().position(randomLatLng).title("Marker "+ (i +1)));
-        }
-
-    }
-
-    private LatLng generateRandomLatLng(){
-        float lat = 0;
-        float lng = 0;
-        lat = -90 + r.nextFloat() * (90 - (-90));
-        lng = -180 + r.nextFloat() * (180 - (-180));
-
-        return new LatLng(lat, lng);
     }
 
     @Override

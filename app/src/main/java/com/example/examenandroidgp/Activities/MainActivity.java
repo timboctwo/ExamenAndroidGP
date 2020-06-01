@@ -6,20 +6,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
 
+import com.example.examenandroidgp.Activities.FirstActivity.FirstActivity;
+import com.example.examenandroidgp.Activities.FourthActivity.FourthActivity;
+import com.example.examenandroidgp.Activities.SecondActivity.SecondActivity;
+import com.example.examenandroidgp.Activities.ThirdActivity.ThirdActivity;
 import com.example.examenandroidgp.R;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.material.snackbar.Snackbar;
 
-import java.util.Random;
-
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
